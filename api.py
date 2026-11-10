@@ -6,6 +6,7 @@ Swagger : http://localhost:8000/docs
 """
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 import config
@@ -19,11 +20,25 @@ Règles :
 - Réponds en français, en quelques phrases maximum."""
 
 app = FastAPI(
-    title="Story RAG API",
-    description="Pose des questions sur l'histoire chargée dans la base vectorielle. "
-                "Les réponses sont générées par un LLM Ollama à partir des passages retrouvés.",
-    version="1.0.0",
+    title="Givaudan 2.IA & Story RAG API",
+    description="API unifiée intégrant le RAG de base et le moteur de recommandation d'arômes Givaudan (Équipe Wintchers).",
+    version="2.0.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Intégration des routes Challenge Givaudan 2.IA
+try:
+    from givaudan_api import router as givaudan_router
+    app.include_router(givaudan_router)
+except ImportError:
+    pass
 
 
 class AskRequest(BaseModel):
